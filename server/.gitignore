@@ -1,0 +1,26 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Optional cache folders
+.cache/
+dist/
+build/
+
+# macOS files
+.DS_Store
+
+# IDE settings (למשל VSCode)
+.vscode/
+.idea/
+
+# Multer uploads (אם לא רוצים להעלות קבצים אמיתיים ל-Git)
+uploads/
