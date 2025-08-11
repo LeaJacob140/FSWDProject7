@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { getCart, removeFromCart, clearCart } from '../services/cartService';
+import { useNavigate } from 'react-router-dom';
 
 function Cart() {
   const [items, setItems] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setItems(getCart());
@@ -33,6 +35,12 @@ function Cart() {
           ))}
           <h2>Total: ${total}</h2>
           <button onClick={() => { clearCart(); setItems([]); }} style={{ marginTop: '1rem' }}>Clear Cart</button>
+          <button 
+            onClick={() => navigate('/checkout')} 
+            style={{ marginTop: '1rem', marginLeft: '10px' }}
+          >
+            Checkout
+          </button>
         </div>
       )}
     </div>
