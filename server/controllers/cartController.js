@@ -1,17 +1,9 @@
-// server/controllers/cartController.js
-const pool = require('../config/db');
+const cartModel = require('../models/cartModel');
 
 const getCart = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const [rows] = await pool.query(
-      `SELECT ci.id, ci.quantity, p.id as product_id, p.name, p.price, p.image
-       FROM cart_items ci
-       JOIN products p ON p.id = ci.product_id
-       WHERE ci.user_id = ?`,
-      [userId]
-    );
-    res.json(rows);
+    const items = await cartModel.getCartItems(req.user.id);
+    res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -19,39 +11,38 @@ const getCart = async (req, res) => {
 
 const addToCart = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { product_id, quantity } = req.body;
-    const q = Math.max(1, Number(quantity) || 1);
-    await pool.query(
-      `INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)
-       ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)`,
-      [userId, product_id, q]
-    );
+    const { productId, quantity } = req.body;
+    if (!productId || quantity < 1) return res.status(400).json({ message: 'Invalid input' });
+
+    await cartModel.addToCart(req.user.id, productId, quantity);
     res.json({ message: 'Added to cart' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-const updateCartItem = async (req, res) => {
+const removeFromCart = async (req, res) => {
   try {
-    const id = req.params.id;
-    const { quantity } = req.body;
-    await pool.query('UPDATE cart_items SET quantity = ? WHERE id = ?', [quantity, id]);
-    res.json({ message: 'Updated' });
+    const cartItemId = req.params.id;
+    await cartModel.removeFromCart(cartItemId);
+    res.json({ message: 'Removed from cart' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-const removeCartItem = async (req, res) => {
+const clearCart = async (req, res) => {
   try {
-    const id = req.params.id;
-    await pool.query('DELETE FROM cart_items WHERE id = ?', [id]);
-    res.json({ message: 'Removed' });
+    await cartModel.clearCart(req.user.id);
+    res.json({ message: 'Cart cleared' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-module.exports = { getCart, addToCart, updateCartItem, removeCartItem };
+module.exports = {
+  getCart,
+  addToCart,
+  removeFromCart,
+  clearCart,
+};

@@ -4,7 +4,7 @@ export default function ProductCard({ product, onAddToCart }) {
   return (
     <div className="product-card">
       <img 
-        src={`http://localhost:5000/uploads/${product.image}`} 
+        src={`http://localhost:5001/uploads/${product.image}`} 
         alt={product.name} 
         style={{ width: '100%', maxHeight: '200px', objectFit: 'contain' }}
       />

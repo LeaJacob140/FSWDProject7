@@ -1,4 +1,3 @@
-// server/controllers/authController.js
 const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -6,40 +5,85 @@ require('dotenv').config();
 
 const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) return res.status(400).json({ message: 'Missing fields' });
+    const { name, email, password } = req.body;
+    if (!name || !email || !password)
+      return res.status(400).json({ message: 'Missing fields' });
 
-    const [exists] = await pool.query('SELECT id FROM users WHERE email = ? OR username = ?', [email, username]);
-    if (exists.length) return res.status(400).json({ message: 'User exists' });
+    // בדיקה אם משתמש כבר קיים עם האימייל
+    const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (existing.length > 0) {
+      return res.status(400).json({ message: 'User with this email already exists' });
+    }
 
-    const hash = await bcrypt.hash(password, 10);
-    const [result] = await pool.query('INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)', [username, email, hash, 'customer']);
-    const userId = result.insertId;
-    res.status(201).json({ id: userId, username, email });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    // הצפנת סיסמה
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // הוספת משתמש חדש
+    const [result] = await pool.query(
+      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+      [name, email, hashedPassword, 'user']
+    );
+
+    // יצירת טוקן
+    const token = jwt.sign({ id: result.insertId, role: 'user' }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    res.status(201).json({
+      token,
+      user: { id: result.insertId, name, email, role: 'user' },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
 const login = async (req, res) => {
   try {
-    const { emailOrUsername, password } = req.body;
-    if (!emailOrUsername || !password) return res.status(400).json({ message: 'Missing fields' });
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ message: 'Missing fields' });
 
-    const [rows] = await pool.query('SELECT id, username, email, password_hash, role FROM users WHERE email = ? OR username = ?', [emailOrUsername, emailOrUsername]);
-    if (!rows.length) return res.status(400).json({ message: 'Invalid credentials' });
+    // חיפוש משתמש לפי אימייל
+    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (rows.length === 0) return res.status(400).json({ message: 'Invalid credentials' });
 
     const user = rows[0];
-    const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
-    res.json({ token, user: { id: user.id, username: user.username, email: user.email, role: user.role } });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error', error: err.message });
+    // השוואת סיסמאות
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) return res.status(400).json({ message: 'Invalid credentials' });
+
+    // יצירת טוקן
+    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    res.json({
+      token,
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-module.exports = { register, login };
+const getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [rows] = await pool.query('SELECT id, name, email, role FROM users WHERE id = ?', [userId]);
+    if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
+    res.json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  getProfile,
+};

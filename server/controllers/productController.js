@@ -1,21 +1,19 @@
-// server/controllers/productController.js
-const pool = require('../config/db');
+const productModel = require('../models/productModel');
 
-const getProducts = async (req, res) => {
+const getAllProducts = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.created_at DESC');
-    res.json(rows);
+    const products = await productModel.getAllProducts();
+    res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-const getProduct = async (req, res) => {
+const getProductById = async (req, res) => {
   try {
-    const id = req.params.id;
-    const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [id]);
-    if (!rows.length) return res.status(404).json({ message: 'Not found' });
-    res.json(rows[0]);
+    const product = await productModel.getProductById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json(product);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -23,14 +21,8 @@ const getProduct = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, stock, category_id } = req.body;
-    const image = req.file ? req.file.filename : null;
-    const [resInsert] = await pool.query(
-      'INSERT INTO products (name, description, price, stock, category_id, image) VALUES (?, ?, ?, ?, ?, ?)',
-      [name, description || null, price || 0, stock || 0, category_id || null, image]
-    );
-    const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [resInsert.insertId]);
-    res.status(201).json(rows[0]);
+    const id = await productModel.createProduct(req.body);
+    res.status(201).json({ message: 'Product created', id });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -38,24 +30,9 @@ const createProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    const id = req.params.id;
-    const { name, description, price, stock, category_id } = req.body;
-    const image = req.file ? req.file.filename : null;
-    const fields = [];
-    const values = [];
-    if (name) { fields.push('name = ?'); values.push(name); }
-    if (description) { fields.push('description = ?'); values.push(description); }
-    if (price !== undefined) { fields.push('price = ?'); values.push(price); }
-    if (stock !== undefined) { fields.push('stock = ?'); values.push(stock); }
-    if (category_id !== undefined) { fields.push('category_id = ?'); values.push(category_id); }
-    if (image) { fields.push('image = ?'); values.push(image); }
-    if (!fields.length) return res.status(400).json({ message: 'No updates sent' });
-
-    values.push(id);
-    const sql = `UPDATE products SET ${fields.join(', ')} WHERE id = ?`;
-    await pool.query(sql, values);
-    const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [id]);
-    res.json(rows[0]);
+    const affectedRows = await productModel.updateProduct(req.params.id, req.body);
+    if (!affectedRows) return res.status(404).json({ message: 'Product not found or no changes' });
+    res.json({ message: 'Product updated' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -63,12 +40,18 @@ const updateProduct = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
   try {
-    const id = req.params.id;
-    await pool.query('DELETE FROM products WHERE id = ?', [id]);
-    res.json({ message: 'Deleted' });
+    const affectedRows = await productModel.deleteProduct(req.params.id);
+    if (!affectedRows) return res.status(404).json({ message: 'Product not found' });
+    res.json({ message: 'Product deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-module.exports = { getProducts, getProduct, createProduct, updateProduct, deleteProduct };
+module.exports = {
+  getAllProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+};

@@ -8,7 +8,7 @@ function Home() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products')
+    fetch('http://localhost:5001/api/products')
       .then(res => res.json())
       .then(data => setProducts(data));
   }, []);
@@ -21,7 +21,7 @@ function Home() {
         <div className="product-grid">
           {products.map(p => (
             <div key={p.id} className="product-card">
-              <img src={`http://localhost:5000/uploads/${p.image}`} alt={p.name} />
+              <img src={`http://localhost:5001/uploads/${p.image}`} alt={p.name} />
               <h3>{p.name}</h3>
               <p>${p.price}</p>
               <button onClick={() => addToCart(p)}>Add to Cart</button>

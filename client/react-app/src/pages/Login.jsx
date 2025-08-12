@@ -9,16 +9,16 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res = await fetch('http://localhost:5000/api/auth/login', {
+    const res = await fetch('http://localhost:5001/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ emailOrUsername: email, password }), // changed here
+      body: JSON.stringify({ email, password }), // changed here
     });
     const data = await res.json();
     if (data.token) {
       localStorage.setItem('token', data.token);
       alert('Login successful');
-      navigate('/');
+      //navigate('/');
     }
   };
 
@@ -38,7 +38,7 @@ function Login() {
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
-          <button type="submit" className="login-btn">Sign in</button>
+          <button type="submit" className="login-btn" onClick={()=>navigate('/home')}>Sign in</button>
         </form>
         <p className="register-text">
           New to us?  

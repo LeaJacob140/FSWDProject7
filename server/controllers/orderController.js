@@ -1,61 +1,44 @@
-// server/controllers/orderController.js
-const pool = require('../config/db');
+const orderModel = require('../models/orderModel');
+const cartModel = require('../models/cartModel');
 
-const createOrder = async (req, res) => {
-  const conn = await pool.getConnection();
+const placeOrder = async (req, res) => {
   try {
-    await conn.beginTransaction();
     const userId = req.user.id;
 
-    const [cart] = await conn.query(
-      `SELECT ci.product_id, ci.quantity, p.price, p.stock
-       FROM cart_items ci JOIN products p ON p.id = ci.product_id
-       WHERE ci.user_id = ?`, [userId]
-    );
-    if (cart.length === 0) {
-      await conn.rollback();
-      conn.release();
-      return res.status(400).json({ message: 'Cart empty' });
+    // לקבל את פרטי העגלה
+    const cartItems = await cartModel.getCartItems(userId);
+    if (cartItems.length === 0) return res.status(400).json({ message: 'Cart is empty' });
+
+    // לחשב סה"כ
+    const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    // ליצור הזמנה
+    const orderId = await orderModel.createOrder(userId, totalPrice);
+
+    // להוסיף פרטי הזמנה
+    for (const item of cartItems) {
+      await orderModel.addOrderItem(orderId, item.product_id, item.quantity, item.price);
     }
 
-    let total = 0;
-    for (const item of cart) {
-      if (item.stock < item.quantity) {
-        await conn.rollback();
-        conn.release();
-        return res.status(400).json({ message: `Not enough stock for product ${item.product_id}` });
-      }
-      total += Number(item.price) * Number(item.quantity);
-    }
+    // לנקות את העגלה
+    await cartModel.clearCart(userId);
 
-    const [orderRes] = await conn.query('INSERT INTO orders (user_id, total_price) VALUES (?, ?)', [userId, total]);
-    const orderId = orderRes.insertId;
-
-    for (const item of cart) {
-      await conn.query('INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)', [orderId, item.product_id, item.quantity, item.price]);
-      await conn.query('UPDATE products SET stock = stock - ? WHERE id = ?', [item.quantity, item.product_id]);
-    }
-
-    await conn.query('DELETE FROM cart_items WHERE user_id = ?', [userId]);
-
-    await conn.commit();
-    res.status(201).json({ orderId, total });
+    res.status(201).json({ message: 'Order placed', orderId });
   } catch (err) {
-    await conn.rollback();
     res.status(500).json({ message: err.message });
-  } finally {
-    conn.release();
   }
 };
 
-const getOrdersForUser = async (req, res) => {
+const getUserOrders = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const [orders] = await pool.query('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC', [userId]);
+    const orders = await orderModel.getOrdersByUser(req.user.id);
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-module.exports = { createOrder, getOrdersForUser };
+module.exports = {
+  placeOrder,
+  getUserOrders,
+};

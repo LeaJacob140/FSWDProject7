@@ -11,7 +11,7 @@ async function authMiddleware(req, res, next) {
   const token = parts[1];
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const [rows] = await pool.query('SELECT id, username, email, role FROM users WHERE id = ?', [payload.id]);
+    const [rows] = await pool.query('SELECT id, name, email, role FROM users WHERE id = ?', [payload.id]);
     if (!rows.length) return res.status(401).json({ message: 'User not found' });
     req.user = rows[0];
     next();

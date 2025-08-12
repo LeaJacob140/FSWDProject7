@@ -1,15 +1,25 @@
-// server/models/userModel.js
-const { DataTypes } = require('sequelize');
+const pool = require('../config/db');
 
-module.exports = (sequelize) => {
-  return sequelize.define('User', {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    name: { type: DataTypes.STRING },
-    email: { type: DataTypes.STRING, allowNull: false, unique: true },
-    password: { type: DataTypes.STRING, allowNull: false },
-    role: { type: DataTypes.ENUM('user','admin'), defaultValue: 'user' }
-  }, {
-    tableName: 'users',
-    timestamps: true,
-  });
+async function findUserByEmail(email) {
+  const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+  return rows[0];
+}
+
+async function createUser({ name, email, password, role = 'user' }) {
+  const [result] = await pool.query(
+    'INSERT INTO users (name, email, password, role, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
+    [name, email, password, role]
+  );
+  return result.insertId;
+}
+
+async function findUserById(id) {
+  const [rows] = await pool.query('SELECT id, name, email, role, created_at FROM users WHERE id = ?', [id]);
+  return rows[0];
+}
+
+module.exports = {
+  findUserByEmail,
+  createUser,
+  findUserById,
 };
