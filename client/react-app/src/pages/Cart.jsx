@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getCart, removeFromCart, clearCart } from '../services/cartService';
 import { useNavigate } from 'react-router-dom';
+import './Cart.css';
 
 function Cart() {
   const [items, setItems] = useState([]);
@@ -15,7 +16,10 @@ function Cart() {
     setItems(getCart());
   };
 
-  const total = items.reduce((sum, item) => sum + item.price * item.qty, 0).toFixed(2);
+  // Ensure price is a number
+  const total = items
+    .reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0)
+    .toFixed(2);
 
   return (
     <div className="container">
@@ -25,10 +29,14 @@ function Cart() {
       ) : (
         <div>
           {items.map(item => (
-            <div key={item.id} className="product-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div
+              key={item.id}
+              className="product-card"
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
               <div>
                 <h3>{item.name}</h3>
-                <p>${item.price} × {item.qty}</p>
+                <p>${(Number(item.price) * Number(item.qty)).toFixed(2)} × {item.qty}</p>
               </div>
               <button onClick={() => handleRemove(item.id)}>Remove</button>
             </div>

@@ -3,29 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import './Login.css'; // Reuse styles
 
 function Register() {
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
-  e.preventDefault();
+  const handleRegister = async (username, email, password) => {
+    const res = await fetch('http://localhost:5001/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({username, email, password }), // changed here
+    });
 
-  const res = await fetch('http://localhost:5001/api/auth/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({name, email, password }), // changed here
-  });
+    const data = await res.json();
+    console.log(data);
 
-  const data = await res.json();
+    // Check if registration was successful
 
-  if (res.ok) {
-    alert('Registered successfully');
-    navigate('/login'); // Go to sign-in page
-  } else {
-    alert(data.message || 'Registration failed');
-  }
-};
+    if (res.ok) {
+      alert('Registered successfully');
+      localStorage.setItem('token', data.token); // <-- save token
+      setUser(data.user);
+      navigate('/login'); // Go to sign-in page
+    } else {
+      alert(data.message || 'Registration failed');
+    }
+  };
 
   return (
     <div className="login-page">
@@ -34,8 +37,8 @@ function Register() {
         <form onSubmit={handleRegister}>
           <input
             placeholder="Full Name"
-            value={name}
-            onChange={e => setName(e.target.value)}
+            value={username}
+            onChange={e => setUsername(e.target.value)}
             required
           />
           <input

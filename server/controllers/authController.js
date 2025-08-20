@@ -5,8 +5,8 @@ require('dotenv').config();
 
 const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password)
+    const { username, email, password } = req.body;
+    if (!username || !email || !password)
       return res.status(400).json({ message: 'Missing fields' });
 
     // בדיקה אם משתמש כבר קיים עם האימייל
@@ -20,18 +20,18 @@ const register = async (req, res) => {
 
     // הוספת משתמש חדש
     const [result] = await pool.query(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, 'user']
+      'INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
+      [username, email, hashedPassword, 'customer']
     );
 
     // יצירת טוקן
-    const token = jwt.sign({ id: result.insertId, role: 'user' }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: result.insertId, role: 'customer' }, process.env.JWT_SECRET, {
       expiresIn: '7d',
     });
 
     res.status(201).json({
       token,
-      user: { id: result.insertId, name, email, role: 'user' },
+      user: { id: result.insertId, username, email, role: 'customer' },
     });
   } catch (error) {
     console.error(error);
@@ -52,7 +52,7 @@ const login = async (req, res) => {
     const user = rows[0];
 
     // השוואת סיסמאות
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     // יצירת טוקן
@@ -62,7 +62,7 @@ const login = async (req, res) => {
 
     res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: { id: user.id, username: user.username, email: user.email, role: user.role },
     });
   } catch (error) {
     console.error(error);
@@ -73,14 +73,39 @@ const login = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const [rows] = await pool.query('SELECT id, name, email, role FROM users WHERE id = ?', [userId]);
+    const [rows] = await pool.query('SELECT id, username, email, role FROM users WHERE id = ?', [userId]);
     if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
-    res.json(rows[0]);
+
+    const user = rows[0];
+    res.json({ id: user.id, username: user.username, email: user.email, role: user.role });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+async function createAdmin() {
+  try {
+    // Check if admin already exists
+    const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', ['admin@gmail.com']);
+    if (existing.length > 0) {
+      console.log('Admin already exists');
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    await pool.query(
+      'INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)',
+      ['adminUser', 'admin@gmail.com', hashedPassword, 'admin']
+    );
+    console.log('Admin user created');
+  } catch (error) {
+    console.error('Error creating admin:', error);
+  }
+}
+
+createAdmin();
+
 
 module.exports = {
   register,

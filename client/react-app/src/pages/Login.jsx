@@ -1,24 +1,29 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Login.css'; // Add CSS import
+import './Login.css';
 
-function Login() {
+function Login({ setUser }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // prevent page reload
+
     const res = await fetch('http://localhost:5001/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }), // changed here
+      body: JSON.stringify({ email, password }),
     });
+
     const data = await res.json();
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-      alert('Login successful');
-      //navigate('/');
+    if (res.ok) {
+      localStorage.setItem('token', data.token); // store token
+      setUser(data.user); // update user in App
+      navigate('/home'); // redirect after login
+    } else {
+      console.error(data.message);
+      alert(data.message);
     }
   };
 
@@ -38,11 +43,9 @@ function Login() {
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
-          <button type="submit" className="login-btn" onClick={()=>navigate('/home')}>Sign in</button>
+          <button type="submit" className="login-btn">Sign in</button>
         </form>
-        <p className="register-text">
-          New to us?  
-        </p>
+        <p className="register-text">New to us?</p>
         <button
           type="button"
           className="register-btn"
