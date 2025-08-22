@@ -1,24 +1,37 @@
+/* Full-page background for product section */
 .container {
+  width: 100vw;
+  min-height: 100vh;
   padding: 20px;
+  background-color: #1e1e2f; /* same as navbar background for visual continuity */
+  box-sizing: border-box;
+  margin: 0;
 }
 
+/* Product grid spans full width */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 20px;
+  width: 100vw;
+  margin: 0;
 }
 
+/* Product card styling */
 .product-card {
-  border: 1px solid #ddd;
+  border: 1px solid #333;
   border-radius: 8px;
   padding: 15px;
-  text-align: center;
-  background: #fff;
+  background: #2b2b3f; /* slightly lighter than navbar for contrast */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   transition: transform 0.2s;
 }
 
 .product-card:hover {
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .product-image {
@@ -26,24 +39,55 @@
   height: 150px;
   object-fit: cover;
   border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.product-details {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.product-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 5px 0;
+  color: #fff; /* make it readable on dark background */
+}
+
+.product-price {
+  margin: 5px 0;
+  font-size: 1rem;
+  color: #ccc;
 }
 
 .add-to-cart-btn {
   margin-top: 10px;
-  padding: 8px 12px;
-  background-color: #007bff;
+  padding: 10px 15px;
+  background-color: #ff6f61; /* matches navbar logo */
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  align-self: stretch;
+  font-weight: bold;
 }
 
 .add-to-cart-btn:hover {
-  background-color: #0056b3;
+  background-color: #e65b50;
 }
 
+/* Cart messages */
+.cart-message {
+  color: #ff6f61;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* Loading and error messages */
 .loading, .error {
   text-align: center;
   margin-top: 50px;
   font-size: 1.2rem;
+  color: #fff;
 }

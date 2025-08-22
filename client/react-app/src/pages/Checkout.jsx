@@ -1,6 +1,8 @@
 import { useCart } from "../services/CartContext.jsx";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import Navbar from "../components/Navbar";
+
 import './Checkout.css';
 
 function Checkout({ user }) {
@@ -37,6 +39,8 @@ function Checkout({ user }) {
   }
 
   return (
+    <>   
+       <Navbar user={user} />
     <div className="checkout-container">
       <h1>Checkout</h1>
       {message && <p className="message">{message}</p>}
@@ -77,6 +81,7 @@ function Checkout({ user }) {
         <button type="submit" className="place-order-btn">Place Order</button>
       </form>
     </div>
+    </>
   );
 }
 

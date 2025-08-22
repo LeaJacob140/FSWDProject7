@@ -14,7 +14,7 @@ function Navbar({ user, setUser }) {
     <nav className="navbar">
       <h1 className="logo">MyStore</h1>
       <div className="nav-links">
-        <Link to="/">Home</Link>
+        <Link to="/home">Home</Link>
         <Link to="/cart">Cart</Link>
         {!user && <Link to="/login">Login</Link>}
         {!user && <Link to="/register">Register</Link>}

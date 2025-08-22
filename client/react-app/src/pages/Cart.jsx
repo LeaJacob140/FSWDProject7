@@ -46,6 +46,8 @@
 
 import { useCart } from "../services/CartContext.jsx";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+
 import './Cart.css';
 
 function Cart({ user }) {
@@ -62,6 +64,8 @@ function Cart({ user }) {
   };
 
   return (
+    <>
+      <Navbar user={user} setUser={() => {}} />
     <div className="container">
       <h1>Your Cart</h1>
       {cart.length === 0 ? (
@@ -88,6 +92,8 @@ function Cart({ user }) {
         </div>
       )}
     </div>
+        </>
+
   );
 }
 

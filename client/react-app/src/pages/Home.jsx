@@ -50,11 +50,7 @@ function Home({ user, setUser }) {
       <Navbar user={user} setUser={setUser} />
       <div>Welcome, {user?.username || "Guest"}</div>
 
-      {user?.role === "admin" && (
-        <div style={{ margin: "20px 0" }}>
-          <AddProduct user={user} />
-        </div>
-      )}
+   
 
       <div className="container">
         <h1>Our Products</h1>
@@ -62,21 +58,24 @@ function Home({ user, setUser }) {
         <div className="product-grid">
           {products.map((product) => (
             <div key={product.id} className="product-card">
-              <img
-                src={`http://localhost:5001/uploads/${product.image}`}
-                alt={product.name}
-                className="product-image"
-              />
-              <h3 className="product-name">{product.name}</h3>
-              <p className="product-price">${Number(product.price).toFixed(2)}</p>
-              <button
-                className="add-to-cart-btn"
-                onClick={() => handleAddToCart(product)}
-                disabled={addingId === product.id}
-              >
-                {addingId === product.id ? "Adding..." : "Add to Cart"}
-              </button>
-            </div>
+                <img
+                  src={`http://localhost:5001/uploads/${product.image}`}
+                  alt={product.name}
+                  className="product-image"
+                />
+                <div className="product-details">
+                  <h3 className="product-name">{product.name}</h3>
+                  <p className="product-price">${Number(product.price).toFixed(2)}</p>
+                </div>
+                <button
+                  className="add-to-cart-btn"
+                  onClick={() => handleAddToCart(product)}
+                  disabled={addingId === product.id}
+                >
+                  {addingId === product.id ? "Adding..." : "Add to Cart"}
+                </button>
+              </div>
+
           ))}
         </div>
       </div>
