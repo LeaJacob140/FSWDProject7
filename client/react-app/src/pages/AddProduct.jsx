@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./AddProduct.css";
 import categories from '../assets/categories';
+import Navbar from "../components/Navbar.jsx";
 
 
 function AddProduct({ user }) {
@@ -74,6 +75,8 @@ function AddProduct({ user }) {
   };
 
   return (
+    <>
+      <Navbar user={user} />
     <div className="form-container">
       <h2>Add New Product</h2>
       {message && <p className="message">{message}</p>}
@@ -155,6 +158,8 @@ function AddProduct({ user }) {
         </button>
       </form>
     </div>
+        </>
+
   );
 }
 

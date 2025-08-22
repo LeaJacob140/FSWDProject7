@@ -6,10 +6,12 @@ import "./home.css";
 
 function Home({ user, setUser }) {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cartMsg, setCartMsg] = useState("");
   const [addingId, setAddingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { addToCart } = useCart();
 
@@ -21,6 +23,7 @@ function Home({ user, setUser }) {
       })
       .then((data) => {
         setProducts(data);
+        setFilteredProducts(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -29,15 +32,27 @@ function Home({ user, setUser }) {
       });
   }, []);
 
+  // Filter products based on search query
+  useEffect(() => {
+    const query = searchQuery.toLowerCase();
+    const filtered = products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(query) ||
+        (p.categoryName && p.categoryName.toLowerCase().includes(query))
+    );
+    setFilteredProducts(filtered);
+  }, [searchQuery, products]);
+
   const handleAddToCart = async (product) => {
     setAddingId(product.id);
     setCartMsg("");
     try {
-      await addToCart(product); // quantity defaults to 1
+      await addToCart(product);
       setCartMsg(`Added "${product.name}" to cart!`);
     } catch (err) {
-      setCartMsg("Failed to add to cart: " + err.message);
-    }
+      alert(err.message); // show alert popup
+      setCartMsg(""); // clear the inline message if needed
+  }
     setAddingId(null);
   };
 
@@ -48,34 +63,44 @@ function Home({ user, setUser }) {
   return (
     <>
       <Navbar user={user} setUser={setUser} />
-      <div>Welcome, {user?.username || "Guest"}</div>
-
-   
-
       <div className="container">
         <h1>Our Products</h1>
+
+        {/* Search Bar */}
+        <input
+          type="text"
+          placeholder="Search by product name or category..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-bar"
+        />
+
         {cartMsg && <div className="cart-message">{cartMsg}</div>}
         <div className="product-grid">
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <div key={product.id} className="product-card">
-                <img
-                  src={`http://localhost:5001/uploads/${product.image}`}
-                  alt={product.name}
-                  className="product-image"
-                />
-                <div className="product-details">
-                  <h3 className="product-name">{product.name}</h3>
-                  <p className="product-price">${Number(product.price).toFixed(2)}</p>
-                </div>
-                <button
-                  className="add-to-cart-btn"
-                  onClick={() => handleAddToCart(product)}
-                  disabled={addingId === product.id}
-                >
-                  {addingId === product.id ? "Adding..." : "Add to Cart"}
-                </button>
+              <img
+                src={`http://localhost:5001/uploads/${product.image}`}
+                alt={product.name}
+                className="product-image"
+              />
+              <div className="product-details">
+                <h3 className="product-name">{product.name}</h3>
+                <p className="product-price">
+                  ${Number(product.price).toFixed(2)}
+                </p>
+                {product.categoryName && (
+                  <p className="product-category">{product.categoryName}</p>
+                )}
               </div>
-
+              <button
+                className="add-to-cart-btn"
+                onClick={() => handleAddToCart(product)}
+                disabled={addingId === product.id}
+              >
+                {addingId === product.id ? "Adding..." : "Add to Cart"}
+              </button>
+            </div>
           ))}
         </div>
       </div>

@@ -13,20 +13,24 @@ const getCart = async (req, res) => {
 const addToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
+    const qty = quantity && quantity > 0 ? quantity : 1;
 
-    if (!productId) return res.status(400).json({ message: 'Product ID required' });
+    const result = await cartModel.addToCart(req.user.id, productId, qty);
 
-    const qty = quantity && quantity > 0 ? quantity : 1; // default to 1
-
-    await cartModel.addToCart(req.user.id, productId, qty);
+    if (!result.success) {
+      return res.status(400).json({ message: result.message });
+    }
 
     const items = await cartModel.getCartItems(req.user.id);
-    res.json(items); // return updated cart
+    res.json(items);
+
   } catch (err) {
     console.error('Add to cart error:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
+
 
 const removeFromCart = async (req, res) => {
   try {

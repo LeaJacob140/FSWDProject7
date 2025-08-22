@@ -41,8 +41,9 @@ export const CartProvider = ({ user, children }) => {
         },
         body: JSON.stringify({ productId: product.id, quantity }),
       });
-
       const data = await res.json();
+      console.log('Add to cart response:', data);
+
       if (!res.ok) throw new Error(data.message || "Failed to add to cart");
 
       setCart(data); // update context
