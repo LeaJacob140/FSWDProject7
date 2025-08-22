@@ -22,8 +22,9 @@ function Register() {
 
     if (res.ok) {
       alert('Registered successfully');
-      localStorage.setItem('token', data.token); // <-- save token
-      setUser(data.user);
+      setUser({ ...data.user, token: data.token });
+
+
       navigate('/login'); // Go to sign-in page
     } else {
       alert(data.message || 'Registration failed');

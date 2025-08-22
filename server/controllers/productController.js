@@ -75,59 +75,99 @@
 //   updateProduct,
 //   deleteProduct,
 // };
-const express = require('express');
-const router = express.Router();
+// controllers/productController.js
 const pool = require('../config/db');
-const multer = require('multer');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const productModel = require('../models/productModel');
 
-// Multer setup for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // make sure this folder exists
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
-  }
-});
-const upload = multer({ storage });
-
-// Middleware to check JWT and admin role
-const adminAuth = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token provided' });
-
+// Get all products (public)
+const getAllProducts = async (req, res) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
-    req.user = decoded;
-    next();
+    const [products] = await pool.query('SELECT * FROM products');
+    res.json(products);
   } catch (err) {
-    return res.status(401).json({ message: 'Invalid token' });
+    res.status(500).json({ message: err.message });
   }
 };
 
-// Add product route
-router.post('/', adminAuth, upload.single('image'), async (req, res) => {
-  const { name, price } = req.body;
-  const image = req.file?.filename;
-
-  if (!name || !price || !image) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
-
+// Get product by ID (public)
+const getProductById = async (req, res) => {
   try {
-    await pool.query(
-      'INSERT INTO products (name, price, image) VALUES (?, ?, ?)',
-      [name, price, image]
-    );
-    res.status(201).json({ message: 'Product added successfully' });
+    const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Product not found' });
+    res.json(rows[0]);
   } catch (err) {
-    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Create new product (admin only)
+const createProduct = async (req, res) => {
+  try {
+    const { name, description, price, stock, category_id } = req.body;
+    const image = req.file?.filename;
+
+    console.log("Request body:", req.body);
+    console.log("Uploaded file:", req.file);
+
+    if (!name || !description || !price || !stock || !category_id || !image) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const id = await productModel.createProduct({
+      name,
+      description,
+      price,
+      stock,
+      category_id,
+      image,
+    });
+
+    res.status(201).json({ message: 'Product added successfully', id });
+  } catch (err) {
+    console.error("Create product error:", err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
-});
+};
 
-module.exports = router;
+// Update product (admin only)
+const updateProduct = async (req, res) => {
+  const { name, description, price, stock, category_id } = req.body;
+  const image = req.file?.filename;
+
+  try {
+    const [result] = await pool.query(
+      `UPDATE products
+       SET name = ?, description = ?, price = ?, stock = ?, category_id = ?, image = IFNULL(?, image), updated_at = NOW()
+       WHERE id = ?`,
+      [name, description, price, stock, category_id, image || null, req.params.id]
+    );
+
+    if (result.affectedRows === 0)
+      return res.status(404).json({ message: 'Product not found or no changes' });
+
+    res.json({ message: 'Product updated successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Delete product (admin only)
+const deleteProduct = async (req, res) => {
+  try {
+    const [result] = await pool.query('DELETE FROM products WHERE id = ?', [req.params.id]);
+    if (result.affectedRows === 0)
+      return res.status(404).json({ message: 'Product not found' });
+
+    res.json({ message: 'Product deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = {
+  getAllProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct
+};

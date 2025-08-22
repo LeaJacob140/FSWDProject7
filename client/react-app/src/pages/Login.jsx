@@ -18,8 +18,7 @@ function Login({ setUser }) {
 
     const data = await res.json();
     if (res.ok) {
-      localStorage.setItem('token', data.token); // store token
-      setUser(data.user); // update user in App
+      setUser({ ...data.user, token: data.token });
       navigate('/home'); // redirect after login
     } else {
       console.error(data.message);

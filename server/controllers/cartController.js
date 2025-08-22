@@ -5,19 +5,26 @@ const getCart = async (req, res) => {
     const items = await cartModel.getCartItems(req.user.id);
     res.json(items);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Get cart error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
 const addToCart = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
-    if (!productId || quantity < 1) return res.status(400).json({ message: 'Invalid input' });
 
-    await cartModel.addToCart(req.user.id, productId, quantity);
-    res.json({ message: 'Added to cart' });
+    if (!productId) return res.status(400).json({ message: 'Product ID required' });
+
+    const qty = quantity && quantity > 0 ? quantity : 1; // default to 1
+
+    await cartModel.addToCart(req.user.id, productId, qty);
+
+    const items = await cartModel.getCartItems(req.user.id);
+    res.json(items); // return updated cart
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Add to cart error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
@@ -25,24 +32,23 @@ const removeFromCart = async (req, res) => {
   try {
     const cartItemId = req.params.id;
     await cartModel.removeFromCart(cartItemId);
-    res.json({ message: 'Removed from cart' });
+    const items = await cartModel.getCartItems(req.user.id);
+    res.json(items);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Remove from cart error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
 const clearCart = async (req, res) => {
   try {
     await cartModel.clearCart(req.user.id);
-    res.json({ message: 'Cart cleared' });
+    const items = await cartModel.getCartItems(req.user.id);
+    res.json(items);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Clear cart error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
-module.exports = {
-  getCart,
-  addToCart,
-  removeFromCart,
-  clearCart,
-};
+module.exports = { getCart, addToCart, removeFromCart, clearCart };

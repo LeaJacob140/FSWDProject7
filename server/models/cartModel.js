@@ -2,10 +2,10 @@ const pool = require('../config/db');
 
 async function getCartItems(userId) {
   const [rows] = await pool.query(
-    `SELECT cart_items.id, product_id, quantity, products.name, products.price, products.image 
-    FROM cart_items 
-    JOIN products ON cart_items.product_id = products.id 
-    WHERE user_id = ?`, 
+    `SELECT ci.id, ci.product_id, ci.quantity, p.name, p.price, p.image
+     FROM cart_items ci
+     JOIN products p ON ci.product_id = p.id
+     WHERE ci.user_id = ?`,
     [userId]
   );
   return rows;
