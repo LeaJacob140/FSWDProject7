@@ -4,8 +4,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Cart from './pages/Cart';
 import AddProduct from './pages/AddProduct';
+import Checkout from './pages/Checkout.jsx';
 import { useState, useEffect } from 'react';
-import { CartProvider } from "./pages/CartContext.jsx";
+import { CartProvider } from "../src/services/CartContext.jsx";
 // import AdminPanel from './pages/AdminPanel';
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/home" element={<Home user={user} setUser={setUser}/>} />
         <Route path="/admin" element={<AddProduct user={user} />} /> 
+        <Route path="/checkout" element={<Checkout user={user} />} />
       </Routes>
     </CartProvider>
 

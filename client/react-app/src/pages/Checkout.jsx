@@ -1,102 +1,81 @@
-import { useState, useEffect } from 'react';
-import { getCart, clearCart } from '../services/cartService';
-import { useNavigate } from 'react-router-dom';
-import './Login.css'; // reuse Amazon styles
+import { useCart } from "../services/CartContext.jsx";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import './Checkout.css';
 
-function Checkout() {
-  const [items, setItems] = useState([]);
-  const [name, setName] = useState('');
-  const [address, setAddress] = useState('');
-  const [payment, setPayment] = useState('');
+function Checkout({ user }) {
+  const { cart, clearCart } = useCart();
   const navigate = useNavigate();
+  const [name, setName] = useState(user?.username || "");
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [address, setAddress] = useState("");
+  const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    setItems(getCart());
-  }, []);
+  const total = cart
+    .reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0)
+    .toFixed(2);
 
-  const total = items.reduce((sum, item) => sum + item.price * item.qty, 0).toFixed(2);
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (items.length === 0) {
-      alert('Cart is empty');
+    if (!name || !cardNumber || !expiry || !cvv || !address) {
+      setMessage("⚠️ Please fill all fields");
       return;
     }
-    const order = {
-      customerName: name,
-      shippingAddress: address,
-      paymentInfo: payment,
-      items,
-      total: parseFloat(total),
-    };
-
-    try {
-      const res = await fetch('http://localhost:5001/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(order),
-      });
-
-      if (res.ok) {
-        clearCart();
-        alert('Order placed successfully!');
-        navigate('/');
-      } else {
-        alert('Failed to place order.');
-      }
-    } catch {
-      alert('Error connecting to server.');
-    }
+    // Here you would normally send data to backend payment API
+    setMessage(`✅ Order placed successfully! Total: $${total}`);
+    clearCart();
   };
 
-  return (
-    <div className="login-page">
-      <div className="login-card" style={{ maxWidth: '600px' }}>
-        <h1 className="login-title">Checkout</h1>
-
-        {items.length === 0 ? (
-          <p>Your cart is empty.</p>
-        ) : (
-          <>
-            <div style={{ marginBottom: '20px' }}>
-              <h2>Order Summary</h2>
-              {items.map(item => (
-                <div key={item.id} style={{ marginBottom: '8px' }}>
-                  {item.name} × {item.qty} - ${ (item.price * item.qty).toFixed(2) }
-                </div>
-              ))}
-              <h3>Total: ${total}</h3>
-            </div>
-
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Shipping Address"
-                value={address}
-                onChange={e => setAddress(e.target.value)}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Payment Info (card number)"
-                value={payment}
-                onChange={e => setPayment(e.target.value)}
-                required
-              />
-              <button type="submit" className="login-btn" style={{ marginTop: '12px' }}>
-                Place Order
-              </button>
-            </form>
-          </>
-        )}
+  if (cart.length === 0) {
+    return (
+      <div className="checkout-container">
+        <h1>Your Cart is Empty</h1>
       </div>
+    );
+  }
+
+  return (
+    <div className="checkout-container">
+      <h1>Checkout</h1>
+      {message && <p className="message">{message}</p>}
+
+      <div className="cart-summary">
+        <h2>Order Summary</h2>
+        {cart.map(item => (
+          <div key={item.productId} className="checkout-item">
+            <span>{item.productName} × {item.quantity}</span>
+            <span>${(Number(item.price) * Number(item.quantity)).toFixed(2)}</span>
+          </div>
+        ))}
+        <h3>Total: ${total}</h3>
+      </div>
+
+      <form className="checkout-form" onSubmit={handleSubmit}>
+        <h2>Billing & Shipping Info</h2>
+        <label>
+          Name:
+          <input type="text" value={name} onChange={e => setName(e.target.value)} required />
+        </label>
+        <label>
+          Card Number:
+          <input type="text" value={cardNumber} onChange={e => setCardNumber(e.target.value)} required placeholder="1234 5678 9012 3456" />
+        </label>
+        <label>
+          Expiry Date:
+          <input type="text" value={expiry} onChange={e => setExpiry(e.target.value)} required placeholder="MM/YY" />
+        </label>
+        <label>
+          CVV:
+          <input type="text" value={cvv} onChange={e => setCvv(e.target.value)} required placeholder="123" />
+        </label>
+        <label>
+          Shipping Address:
+          <textarea value={address} onChange={e => setAddress(e.target.value)} required />
+        </label>
+        <button type="submit" className="place-order-btn">Place Order</button>
+      </form>
     </div>
   );
 }
