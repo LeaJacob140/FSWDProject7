@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useCart } from "../services/CartContext.jsx";
-import AddProduct from "./AddProduct";
 import "./home.css";
 
 function Home({ user, setUser }) {
@@ -15,6 +14,7 @@ function Home({ user, setUser }) {
 
   const { addToCart } = useCart();
 
+  // Fetch products
   useEffect(() => {
     fetch("http://localhost:5001/api/products")
       .then((res) => {
@@ -32,13 +32,13 @@ function Home({ user, setUser }) {
       });
   }, []);
 
-  // Filter products based on search query
+  // Filter products by search query
   useEffect(() => {
     const query = searchQuery.toLowerCase();
     const filtered = products.filter(
       (p) =>
         p.name.toLowerCase().includes(query) ||
-        (p.categoryName && p.categoryName.toLowerCase().includes(query))
+        (p.description && p.description.toLowerCase().includes(query))
     );
     setFilteredProducts(filtered);
   }, [searchQuery, products]);
@@ -50,9 +50,9 @@ function Home({ user, setUser }) {
       await addToCart(product);
       setCartMsg(`Added "${product.name}" to cart!`);
     } catch (err) {
-      alert(err.message); // show alert popup
-      setCartMsg(""); // clear the inline message if needed
-  }
+      alert(err.message);
+      setCartMsg("");
+    }
     setAddingId(null);
   };
 
@@ -64,18 +64,19 @@ function Home({ user, setUser }) {
     <>
       <Navbar user={user} setUser={setUser} />
       <div className="container">
-        <h1>Our Products</h1>
+        {/* <h1>Our Products</h1> */}
 
         {/* Search Bar */}
         <input
           type="text"
-          placeholder="Search by product name or category..."
+          placeholder="Search by name or description..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-bar"
         />
 
         {cartMsg && <div className="cart-message">{cartMsg}</div>}
+
         <div className="product-grid">
           {filteredProducts.map((product) => (
             <div key={product.id} className="product-card">
@@ -86,12 +87,10 @@ function Home({ user, setUser }) {
               />
               <div className="product-details">
                 <h3 className="product-name">{product.name}</h3>
+                <p className="product-description">{product.description}</p>
                 <p className="product-price">
                   ${Number(product.price).toFixed(2)}
                 </p>
-                {product.categoryName && (
-                  <p className="product-category">{product.categoryName}</p>
-                )}
               </div>
               <button
                 className="add-to-cart-btn"
