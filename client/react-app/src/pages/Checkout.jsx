@@ -19,16 +19,43 @@ function Checkout({ user }) {
     .reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0)
     .toFixed(2);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!name || !cardNumber || !expiry || !cvv || !address) {
-      setMessage("⚠️ Please fill all fields");
-      return;
-    }
-    // Here you would normally send data to backend payment API
-    setMessage(`✅ Order placed successfully! Total: $${total}`);
-    clearCart();
-  };
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!name || !cardNumber || !expiry || !cvv || !address) {
+        setMessage("⚠️ Please fill all fields");
+        return;
+      }
+
+      try {
+        // Call backend to place order
+        const res = await fetch("http://localhost:5001/api/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({ /* optional order info if needed */ }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.message || "Failed to place order");
+        }
+
+        const data = await res.json();
+        console.log("Order placed:", data);
+
+        // Clear the cart in context
+        await clearCart();
+
+        // Redirect to Orders page
+        navigate("/orders");
+      } catch (err) {
+        console.error("Checkout error:", err);
+        setMessage(`❌ ${err.message}`);
+      }
+    };
+
 
   if (cart.length === 0) {
     return (

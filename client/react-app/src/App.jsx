@@ -5,6 +5,8 @@ import Register from './pages/Register';
 import Cart from './pages/Cart';
 import AddProduct from './pages/AddProduct';
 import Checkout from './pages/Checkout.jsx';
+import Orders from "./pages/Orders";
+
 import { useState, useEffect } from 'react';
 import { CartProvider } from "../src/services/CartContext.jsx";
 // import AdminPanel from './pages/AdminPanel';
@@ -57,6 +59,8 @@ function App() {
         <Route path="/home" element={<Home user={user} setUser={setUser}/>} />
         <Route path="/admin" element={<AddProduct user={user} />} /> 
         <Route path="/checkout" element={<Checkout user={user} />} />
+        <Route path="/orders" element={<Orders user={user} />} />
+        {/* <Route path="/admin" element={<AdminPanel user={user} />} /> */}
       </Routes>
     </CartProvider>
 

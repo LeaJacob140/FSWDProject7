@@ -38,7 +38,19 @@ const getUserOrders = async (req, res) => {
   }
 };
 
+const getOrderItems = async (req, res) => {
+  try {
+    const items = await orderModel.getOrderItems(req.params.orderId);
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
 module.exports = {
   placeOrder,
   getUserOrders,
+  getOrderItems
 };
