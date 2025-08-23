@@ -9,8 +9,11 @@ async function authMiddleware(req, res, next) {
   const parts = header.split(' ');
   if (parts.length !== 2) return res.status(401).json({ message: 'Token error' });
   const token = parts[1];
+  console.log('Header:', req.headers['authorization']);
+  console.log('Token received:', token); // בדיקה
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Payload after verify:', payload); // בדיקה
     const [rows] = await pool.query('SELECT id, username, email, role FROM users WHERE id = ?', [payload.id]);
     if (!rows.length) return res.status(401).json({ message: 'User not found' });
     req.user = rows[0];

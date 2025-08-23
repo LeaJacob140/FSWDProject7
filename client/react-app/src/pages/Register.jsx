@@ -2,17 +2,18 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css'; // Reuse styles
 
-function Register() {
+function Register({ setUser }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleRegister = async (username, email, password) => {
+  const handleRegister = async (e) => {
+    e.preventDefault(); // prevent page reload
     const res = await fetch('http://localhost:5001/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({username, email, password }), // changed here
+      body: JSON.stringify({ username, email, password }), // changed here
     });
 
     const data = await res.json();
@@ -21,11 +22,12 @@ function Register() {
     // Check if registration was successful
 
     if (res.ok) {
+      localStorage.setItem('token', data.token); // Save token for future use
       alert('Registered successfully');
       setUser({ ...data.user, token: data.token });
 
 
-      navigate('/login'); // Go to sign-in page
+      navigate('/home'); // Go to sign-in page
     } else {
       alert(data.message || 'Registration failed');
     }

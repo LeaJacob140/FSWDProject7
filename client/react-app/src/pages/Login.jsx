@@ -18,6 +18,8 @@ function Login({ setUser }) {
 
     const data = await res.json();
     if (res.ok) {
+      console.log('Token received:', data.token);
+      localStorage.setItem('token', data.token); // לשמור לשימוש עתידי
       setUser({ ...data.user, token: data.token });
       navigate('/home'); // redirect after login
     } else {

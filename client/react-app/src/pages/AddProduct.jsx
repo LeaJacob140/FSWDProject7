@@ -154,7 +154,7 @@ function AddProduct({ user }) {
         </div>
 
         <button type="submit" className="submit-btn">
-          ➕ Add Product
+          Add Product
         </button>
       </form>
     </div>

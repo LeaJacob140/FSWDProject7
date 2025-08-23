@@ -26,7 +26,7 @@ const getProductById = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const { name, description, price, stock, category_id } = req.body;
-    const image = req.file?.filename;
+    const image = req.file?`/uploads/${req.file.filename}` : null;
 
     console.log("Request body:", req.body);
     console.log("Uploaded file:", req.file);
