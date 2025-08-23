@@ -1,95 +1,170 @@
-/* Cart.css */
-.container {
-  max-width: 900px;
+
+.cart-container {
+  width: 100%; 
   margin: 2rem auto;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 50px;
+  background: #ffffff;
+  border-radius: 16px;
+  align-items: center;
+  flex-direction: column;
+  display: flex;
+
+}
+.product-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;  /* smaller padding */
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+/* ✅ Product Image */
+.product-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.product-info {
+  flex: 1;
+}
+
+.product-info h3 {
+  margin: 0 0 0.2rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.product-details {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.remove-btn {
+  background-color: #f44336;
+  color: white;
+  padding: 0.4rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
 }
 
 h1 {
   text-align: center;
   margin-bottom: 2rem;
-  color: #343a40;
-}
-
-.product-card {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: transform 0.2s;
-}
-
-.product-card:hover {
-  transform: translateY(-2px);
-}
-
-.product-info h3 {
-  margin: 0 0 0.3rem 0;
-  font-size: 1.2rem;
-  color: #212529;
-}
-
-.product-info p {
-  margin: 0;
-  font-size: 1rem;
-  color: #495057;
-}
-
-button {
-  padding: 0.4rem 0.8rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-button:active {
-  transform: scale(0.98);
-}
-
-button.remove-btn {
-  background-color: #dc3545;
-  color: white;
-}
-
-button.clear-btn {
-  background-color: #ffc107;
-  color: #212529;
-}
-
-button.checkout-btn {
-  background-color: #28a745;
-  color: white;
-}
-
-h2 {
-  text-align: right;
-  margin-top: 1rem;
-  font-size: 1.5rem;
-  color: #212529;
-}
-.product-info h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.3rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #212529;
 }
 
+.empty-cart {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #6c757d;
+}
+
 .product-info p {
   margin: 0;
-  font-size: 1rem;
-  color: #495057;
+  font-size: 0.95rem;
+  color: #555;
   line-height: 1.4;
+}
+
+.product-info span {
+  font-weight: 600;
+  color: #212529;
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+.clear-btn {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.checkout-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.cart-summary {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #eee;
+  text-align: right;
+}
+
+.cart-summary h2 {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.cart-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* 📱 Mobile Styles */
+@media (max-width: 600px) {
+  .cart-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .product-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .remove-btn {
+    align-self: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  .cart-summary {
+    text-align: center;
+  }
+
+  .cart-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cart-actions button {
+    width: 100%;
+    max-width: 250px;
+  }
 }

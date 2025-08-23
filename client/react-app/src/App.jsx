@@ -1,4 +1,9 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import Navbar from './components/Navbar';
+import { CartProvider } from './services/CartContext.jsx';
+
+// Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -7,67 +12,61 @@ import AddProduct from './pages/AddProduct';
 import Checkout from './pages/Checkout.jsx';
 import Orders from "./pages/Orders";
 
-import { useState, useEffect } from 'react';
-import { CartProvider } from "../src/services/CartContext.jsx";
-// import AdminPanel from './pages/AdminPanel';
-
 function App() {
-    const [user, setUser] = useState(null);
-    useEffect(() => {
-      const fetchUser = async () => {
-        const token = localStorage.getItem('token'); // your JWT
-        console.log('Token:', token);
-        if (!token){
-          console.log('No token found');
-          return;
-        } 
+  const [user, setUser] = useState(null);
 
-        try {
-          const res = await fetch('http://localhost:5001/api/auth/me', {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
 
-          if (res.ok) {
-            const data = await res.json();
-            console.log('User data:', data);
-            setUser(data); // backend returns the user object directly
-          } else {
-            setUser(null);
-            console.error('Failed to fetch user:', res.statusText);
-          }
-        } catch (err) {
-          console.error('Failed to fetch user:', err);
-          
+      try {
+        const res = await fetch('http://localhost:5001/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data); // backend returns user object
+        } else {
           setUser(null);
         }
-      };
-
-      fetchUser();
-    }, []);
+      } catch (err) {
+        console.error(err);
+        setUser(null);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
     <BrowserRouter>
-        <CartProvider user={user}>
+      <CartProvider user={user}>
+        <AppContent user={user} setUser={setUser} />
+      </CartProvider>
+    </BrowserRouter>
+  );
+}
 
+// Separate component to use useLocation
+function AppContent({ user, setUser }) {
+  const location = useLocation();
+  const hideNavbar = ['/login', '/register'].includes(location.pathname);
+
+  return (
+    <>
+      {!hideNavbar && <Navbar user={user} setUser={setUser} />}
       <Routes>
         <Route path="/" element={<Login setUser={setUser} />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/home" element={<Home user={user} setUser={setUser}/>} />
-        <Route path="/admin" element={<AddProduct user={user} />} /> 
+        <Route path="/register" element={<Register user={user} setUser={setUser} />} />
+        <Route path="/cart" element={<Cart user={user} setUser={setUser} />} />
+        <Route path="/home" element={<Home user={user} setUser={setUser} />} />
+        <Route path="/admin" element={<AddProduct user={user} />} />
         <Route path="/checkout" element={<Checkout user={user} />} />
         <Route path="/orders" element={<Orders user={user} />} />
-        {/* <Route path="/admin" element={<AdminPanel user={user} />} /> */}
       </Routes>
-    </CartProvider>
-
-  </BrowserRouter>
-
+    </>
   );
 }
 
 export default App;
-// new
