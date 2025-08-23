@@ -15,25 +15,19 @@ import Orders from "./pages/Orders";
 function App() {
   const [user, setUser] = useState(null);
 
-<<<<<<< HEAD
   useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem('token');
       if (!token) return;
-=======
-        try {
-          const res = await fetch('http://localhost:5001/api/auth/me', {
-            headers: {
-              'Content-Type': 'application/json', 
-              'Authorization': `Bearer ${token}`,
-            },
-          });
->>>>>>> 5539645 (logreg)
 
       try {
         const res = await fetch('http://localhost:5001/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
         });
+
         if (res.ok) {
           const data = await res.json();
           setUser(data); // backend returns user object
@@ -45,6 +39,7 @@ function App() {
         setUser(null);
       }
     };
+
     fetchUser();
   }, []);
 
@@ -68,17 +63,10 @@ function AppContent({ user, setUser }) {
       <Routes>
         <Route path="/" element={<Login setUser={setUser} />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
-<<<<<<< HEAD
         <Route path="/register" element={<Register user={user} setUser={setUser} />} />
         <Route path="/cart" element={<Cart user={user} setUser={setUser} />} />
         <Route path="/home" element={<Home user={user} setUser={setUser} />} />
         <Route path="/admin" element={<AddProduct user={user} />} />
-=======
-        <Route path="/register" element={<Register setUser={setUser} />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/home" element={<Home user={user} setUser={setUser}/>} />
-        <Route path="/admin" element={<AddProduct user={user} />} /> 
->>>>>>> 5539645 (logreg)
         <Route path="/checkout" element={<Checkout user={user} />} />
         <Route path="/orders" element={<Orders user={user} />} />
       </Routes>
