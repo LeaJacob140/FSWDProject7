@@ -38,7 +38,7 @@ function Cart({ user }) {
                 />
 
                 <div className="product-info">
-                  <h3>{item.productName}</h3>
+                  {item.name} {item.description}
                   <p className="product-details">
                     Qty: {item.quantity} | Price: ${item.price} | 
                     Total: ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
