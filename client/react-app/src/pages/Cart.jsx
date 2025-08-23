@@ -1,7 +1,5 @@
 import { useCart } from "../services/CartContext.jsx";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-
 import './Cart.css';
 
 function Cart({ user }) {
@@ -28,10 +26,17 @@ function Cart({ user }) {
           </div>
         ) : (
           <div className="cart-content">
-            {cart.map(item => (
-             <div key={item.productId} className="product-card">
-                <img src={item.image} alt={item.productName} className="product-img" />
-                
+        {cart.map(item => {
+            console.log("Image URL:", item.image); // ✅ move it here
+
+            return (
+              <div key={item.productId} className="product-card-cart">
+                <img
+                  src={`http://localhost:5001/uploads/${item.image}`}
+                  alt={item.productName}
+                  className="product-img"
+                />
+
                 <div className="product-info">
                   <h3>{item.productName}</h3>
                   <p className="product-details">
@@ -44,9 +49,9 @@ function Cart({ user }) {
                   ✖
                 </button>
               </div>
+            );
+          })}
 
-
-            ))}
 
             <div className="cart-summary">
               <h2>Total: ${total}</h2>

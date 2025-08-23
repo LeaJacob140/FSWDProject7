@@ -133,22 +133,6 @@
   color: #000;
 }
 
-.search-bar {
-  width: 100%;
-  max-width: 500px;
-  padding: 10px 15px;
-  margin: 20px auto;   /* centers it */
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  font-size: 1rem;
-  outline: none;
-  display: block;
-}
-
-.search-bar:focus {
-  border-color: #ff6f61;
-  box-shadow: 0 0 5px rgba(255, 111, 97, 0.5);
-}
 
 /* Responsive design */
 
