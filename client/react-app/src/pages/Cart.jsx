@@ -30,7 +30,7 @@ function Cart({ user }) {
             console.log("Image URL:", item.image); // ✅ move it here
 
             return (
-              <div key={item.productId} className="product-card-cart">
+              <div key={item.id} className="product-card-cart">
                 <img
                   src={`http://localhost:5001/uploads/${item.image}`}
                   alt={item.productName}
@@ -45,7 +45,7 @@ function Cart({ user }) {
                   </p>
                 </div>
 
-                <button className="remove-btn" onClick={() => removeFromCart(item.productId)}>
+                <button className="remove-btn" onClick={() => removeFromCart(item.id)}>
                   ✖
                 </button>
               </div>

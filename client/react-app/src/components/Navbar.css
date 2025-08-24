@@ -5,7 +5,7 @@
   left: 0;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   padding: 0.75rem 1rem;
   background-color: #1e1e2f;
@@ -18,16 +18,19 @@
   font-size: 1.8rem;
   font-weight: bold;
   color: #ff6f61;
+  margin-right: 2rem;
 }
 
 /* Nav links (desktop) */
 .nav-links {
   display: flex;
   align-items: center;
+  margin-left: 7rem;
+  gap: 1rem;
 }
 
 .nav-links a {
-  margin: 0 1rem;
+  margin: 0 0.5rem;
   text-decoration: none;
   color: #fff;
   font-weight: 500;

@@ -91,6 +91,11 @@ function Home({ user, setUser }) {
                 <p className="product-price">
                   ${Number(product.price).toFixed(2)}
                 </p>
+                {user.role === 'admin' && (
+                  <p className="product-stock">
+                   In Stock: {product.stock} {/* או quantity, תלוי איך זה נקרא במידע מהשרת */}
+                  </p>
+                )}
               </div>
               <button
                 className="add-to-cart-btn"

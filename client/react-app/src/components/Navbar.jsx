@@ -1,10 +1,10 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import './Navbar.css';
 
 function Navbar({ user, setUser }) {
   const navigate = useNavigate();
-  const location = useLocation();
+
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -13,7 +13,6 @@ function Navbar({ user, setUser }) {
     navigate('/login');
   };
 
-  const hideAuthLinks = ['/login', '/register'].includes(location.pathname);
 
   return (
     <nav className="navbar">
@@ -22,22 +21,22 @@ function Navbar({ user, setUser }) {
       {/* Hamburger for mobile */}
       <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>☰</div>
 
-      <div className={`nav-links ${menuOpen ? 'show' : ''}`}>
-        <Link to="/home">Home</Link>
-        <Link to="/cart">Cart</Link>
-
-        {/* Show login/register only if user is not logged in and not on login/register page */}
-        {!user && !hideAuthLinks && <Link to="/login">Login</Link>}
-        {!user && !hideAuthLinks && <Link to="/register">Register</Link>}
-
-        {/* Admin link */}
-        {user && user.role === 'admin' && <Link to="/admin">Admin</Link>}
-
-        {/* Logout button */}
-        {user && (
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
+     <div className={`nav-links ${menuOpen ? 'show' : ''}`}>
+        {user ? (
+          // משתמש מחובר
+          <>
+            <Link to="/home">Home</Link>
+            <Link to="/cart">Cart</Link>
+            <Link to="/orders">Orders</Link>
+            {user.role === 'admin' && <Link to="/admin">Admin</Link>}
+            <button className="logout-btn" onClick={handleLogout}>Logout</button>
+          </>
+        ) : (
+          // משתמש לא מחובר
+          <>
+            <Link to="/login">Login</Link>
+            <Link to="/register">Register</Link>
+          </>
         )}
       </div>
     </nav>
