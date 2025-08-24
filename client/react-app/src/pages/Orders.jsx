@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
-import { useNavigate } from "react-router-dom";
 import "./Orders.css";
 
 function Orders({ user }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -21,7 +19,7 @@ function Orders({ user }) {
         if (!res.ok) throw new Error("Failed to fetch orders");
         const data = await res.json();
 
-        // Fetch items for each order
+        /// Fetch items for each order
         const ordersWithItems = await Promise.all(
             data.map(async (order) => {
                 const resItems = await fetch(

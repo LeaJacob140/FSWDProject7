@@ -65,7 +65,7 @@ function AppContent({ user, setUser }) {
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/register" element={<Register user={user} setUser={setUser} />} />
         <Route path="/cart" element={<Cart user={user} setUser={setUser} />} />
-        <Route path="/home" element={<Home user={user} setUser={setUser} />} />
+        <Route path="/home" element={user ? <Home user={user} setUser={setUser} /> : <div>Loading...</div>} />
         <Route path="/admin" element={<AddProduct user={user} />} />
         <Route path="/checkout" element={<Checkout user={user} />} />
         <Route path="/orders" element={<Orders user={user} />} />

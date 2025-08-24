@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Navbar from "../components/Navbar";
 import { useCart } from "../services/CartContext.jsx";
 import "./home.css";
 
-function Home({ user, setUser }) {
+function Home({ user}) {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,10 +12,15 @@ function Home({ user, setUser }) {
   const [addingId, setAddingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const fetchedProducts = useRef(false); 
+
   const { addToCart } = useCart();
 
   // Fetch products
   useEffect(() => {
+    if (fetchedProducts.current) return; // Skip if already fetched
+    fetchedProducts.current = true; // Mark as fetched      
+
     fetch("http://localhost:5001/api/products")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch products");
@@ -62,7 +67,6 @@ function Home({ user, setUser }) {
 
   return (
     <>
-      <Navbar user={user} setUser={setUser} />
       <div className="container">
         {/* <h1>Our Products</h1> */}
 
